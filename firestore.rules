@@ -1,0 +1,106 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidCitySave(data, userId) {
+      return data.userId is string &&
+             data.userId == userId &&
+             data.userId == request.auth.uid &&
+             data.cityName is string &&
+             data.cityName.size() >= 1 &&
+             data.cityName.size() <= 40 &&
+             data.coins is number &&
+             data.coins >= 0 &&
+             data.coins <= 1000000000 &&
+             data.civ is number &&
+             data.civ >= 0 &&
+             data.civ <= 1000000000 &&
+             data.gameTime is number &&
+             data.gameTime >= 0 &&
+             data.gameTime <= 10000000000 &&
+             data.era is int &&
+             data.era >= 0 &&
+             data.era <= 4 &&
+              data.exp is int &&
+              data.exp >= 0 &&
+              data.exp <= 6 &&
+              data.tax is int &&
+              data.tax >= 0 &&
+              data.tax <= 25 &&
+              data.spend is int &&
+              data.spend >= 50 &&
+              data.spend <= 150 &&
+              data.bless is int &&
+              data.bless >= 0 &&
+              data.bless <= 10000 &&
+              data.logEntries is list &&
+              data.logEntries.size() <= 6 &&
+              (data.logEntries.size() == 0 || data.logEntries[0] is string) &&
+              data.cells is list &&
+              data.cells.size() <= 4900 &&
+              (data.cells.size() == 0 || data.cells[0] is map);
+    }
+
+    match /users/{userId}/cities/{cityId} {
+      allow get: if isSignedIn() && request.auth.uid == userId && isValidId(cityId);
+      allow list: if isSignedIn() && request.auth.uid == userId;
+
+      allow create: if isSignedIn() &&
+                       isValidCitySave(incoming(), userId) &&
+                       request.auth.uid == userId &&
+                       isValidId(userId) &&
+                       isValidId(cityId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'cityName', 'coins', 'civ', 'gameTime',
+                         'era', 'exp', 'tax', 'spend', 'bless',
+                         'logEntries', 'cells', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'cityName', 'coins', 'civ', 'gameTime',
+                         'era', 'exp', 'tax', 'spend', 'bless',
+                         'logEntries', 'cells', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().createdAt is timestamp &&
+                       incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp &&
+                       incoming().updatedAt <= request.time;
+
+      allow update: if isSignedIn() &&
+                       isValidCitySave(incoming(), userId) &&
+                       request.auth.uid == userId &&
+                       isValidId(cityId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp &&
+                       incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'cityName', 'coins', 'civ', 'gameTime',
+                         'era', 'exp', 'tax', 'spend', 'bless',
+                         'logEntries', 'cells', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(cityId);
+    }
+  }
+}

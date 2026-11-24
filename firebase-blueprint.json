@@ -1,0 +1,93 @@
+{
+  "entities": {
+    "CitySave": {
+      "title": "CitySave",
+      "description": "Persisted state of a player's 3D city from village to futuristic metropolis.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated owner UID matching request.auth.uid."
+        },
+        "cityName": {
+          "type": "string",
+          "description": "Display name of the player's city (1-40 chars)."
+        },
+        "coins": {
+          "type": "number",
+          "description": "Current treasury coins (>= 0)."
+        },
+        "civ": {
+          "type": "number",
+          "description": "Civilization progression points (>= 0)."
+        },
+        "gameTime": {
+          "type": "number",
+          "description": "Accumulated simulation seconds (>= 0)."
+        },
+        "era": {
+          "type": "integer",
+          "description": "Current era index (0 to 4)."
+        },
+        "exp": {
+          "type": "integer",
+          "description": "Territory expansion tier (0 to 6)."
+        },
+        "tax": {
+          "type": "integer",
+          "description": "City tax rate percentage (0 to 25)."
+        },
+        "spend": {
+          "type": "integer",
+          "description": "Public services spending percentage (50 to 150)."
+        },
+        "bless": {
+          "type": "integer",
+          "description": "Count of Zeus villager blessings (>= 0)."
+        },
+        "logEntries": {
+          "type": "array",
+          "description": "Recent city event log entries (up to 6 items)."
+        },
+        "cells": {
+          "type": "array",
+          "description": "Occupied grid cells on the 70x70 map (up to 4900 cell maps)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when city save was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when city save was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "cityName",
+        "coins",
+        "civ",
+        "gameTime",
+        "era",
+        "exp",
+        "tax",
+        "spend",
+        "bless",
+        "logEntries",
+        "cells",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/cities/{cityId}": {
+      "schema": {
+        "$ref": "#/entities/CitySave"
+      },
+      "description": "User-owned saved city documents for Aldea Metrópolis."
+    }
+  }
+}

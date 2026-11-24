@@ -1,0 +1,6 @@
+{
+  "name": "Aldea Metrópolis",
+  "description": "Juego 3D de construcción de ciudades desde una aldea hasta una metrópolis futurista, con recorrido a pie entre aldeanos, vehículos y ciclo día-noche.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
